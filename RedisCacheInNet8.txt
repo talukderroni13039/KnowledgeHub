@@ -1,0 +1,118 @@
+#Introduction:
+
+
+
+
+#Implementation: in .NET 8.
+
+Redis Setup:
+Check docker desktop is running or not
+
+The first step is to set up a Redis server using the docker command in the command prompt:
+
+docker run --name redis-cache -p 90:6379 -d redis 
+
+docker ps -a command, we can see all the Docker containers:
+
+-Install "StackExchange.Redis" Nuget pakage
+
+-Make Conncetion:
+
+public class ConnectionHelper
+{
+    private readonly IConfiguration _configuration;
+    private readonly Lazy<ConnectionMultiplexer> _lazyConnection;
+
+    public ConnectionHelper(IConfiguration configuration)
+    {
+        _configuration = configuration;
+
+        string redisConn = _configuration.GetValue<string>("RedisConfig:RedisConn");
+
+        _lazyConnection = new Lazy<ConnectionMultiplexer>(() =>
+        {
+            return ConnectionMultiplexer.Connect(redisConn);
+        });
+    }
+    public ConnectionMultiplexer Connection => _lazyConnection.Value;
+}
+  
+In appseting.Json
+
+"RedisConfig": {
+    //"RedisURL": "127.0.0.1:6379",
+    "RedisConn": "localhost:90",
+    "Duration": 5
+  },
+
+-Make Service:
+
+  public interface ICacheService
+  {
+      T GetData<T>(string key);
+      bool SetData<T>(string key, T value, DateTimeOffset expirationTime);
+      object RemoveData(string key);
+  }
+
+-Implement Service:
+
+public class CacheService : ICacheService
+{
+
+    private readonly Lazy<IDatabase> _lazyDatabase;
+    private readonly ConnectionHelper _connection;
+
+    public CacheService(ConnectionHelper connection)
+    {
+        _connection = connection;
+        _lazyDatabase = new Lazy<IDatabase>(() => _connection.Connection.GetDatabase());
+    }
+    private IDatabase _db => _lazyDatabase.Value;
+    public T GetData<T>(string key)
+    {
+        var value = _db.StringGet(key);
+        if (!string.IsNullOrEmpty(value))
+        {
+            return JsonConvert.DeserializeObject<T>(value);
+        }
+        return default;
+    }
+    public bool SetData<T>(string key, T value, DateTimeOffset expirationTime)
+    {
+        TimeSpan expiryTime = expirationTime.DateTime.Subtract(DateTime.Now);
+        var isSet = _db.StringSet(key, JsonConvert.SerializeObject(value), expiryTime);
+        return isSet;
+    }
+    public object RemoveData(string key)
+    {
+        bool _isKeyExist = _db.KeyExists(key);
+        if (_isKeyExist == true)
+        {
+            return _db.KeyDelete(key);
+        }
+        return false;
+    }
+}
+
+-GetDataFromCache
+
+ public List<DataPoint> GetDatapointCachedData()
+ {
+     int duration = _configuration.GetValue<int>("RedisConfig:Duration");
+
+     var cacheData = _ICacheService.GetData<List<DataPoint>>("datapoint");
+     if (cacheData == null)
+     {
+         var expirationTime = DateTimeOffset.Now.AddMinutes(duration);
+         DataPoints = _dataPointRepository.GetDataPoints().Result;
+
+         _ICacheService.SetData<IEnumerable<DataPoint>>("datapoint", DataPoints, expirationTime);
+     }
+     else
+     {
+         DataPoints = cacheData;
+     }
+
+     return DataPoints;
+ }
+
