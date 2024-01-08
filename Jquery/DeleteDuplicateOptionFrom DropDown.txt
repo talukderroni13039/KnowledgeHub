@@ -1,0 +1,55 @@
+var map = {};
+
+              
+    function DeleteDuplicateOptionFromDropDown()
+  
+    
+    {
+        
+        $('table.TableItemDetails tbody .SlNo').each(function (index) 
+        {
+            alert(index);
+
+            map = {};
+
+                jQuery('table.TableItemDetails tbody tr').eq(index).find("Select.Breakfast option").map(function(idx, val) {
+                   
+                    if (map[this.value]) {
+                        $(this).remove()
+                    }
+                    map[this.value] = true;
+                   
+                });
+
+                map = {};
+                jQuery('table.TableItemDetails tbody tr').eq(index).find("Select.Lunch option").map(function(idx, val) {
+                   
+                    if (map[this.value]) {
+                        $(this).remove()
+                    }
+                    map[this.value] = true;
+                   
+                });
+
+                map = {};
+                jQuery('table.TableItemDetails tbody tr').eq(index).find("Select.Dinner option").map(function(idx, val) {
+                   
+                    if (map[this.value]) {
+                        $(this).remove()
+                    }
+                    map[this.value] = true;
+                   
+                });
+
+
+
+            });
+
+
+
+
+
+
+
+    }
+

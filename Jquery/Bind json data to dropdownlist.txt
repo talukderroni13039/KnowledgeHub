@@ -1,0 +1,10 @@
+success:function(data){
+ $('.ddlProjectvalue').empty();
+ $.each(data,function (index, item) { 
+    $('.ddlProjectvalue').append$('<option>', {
+                                value: item.Value,
+                                text: item.Text
+                            }, '<option/>')
+                            }
+                        );
+   }

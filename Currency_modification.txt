@@ -1,0 +1,14 @@
+17/11/2019
+
+Currency Model
+
+
+        [DisplayFormat(DataFormatString = "{0:0.0000}")]
+        [Display(Name = "Exchange Rate")]
+        public Decimal Exchange_Rate { get; set; }
+
+go
+
+ALTER TABLE Currency
+ALTER COLUMN Exchange_Rate decimal(7, 4);
+

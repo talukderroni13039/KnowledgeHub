@@ -1,0 +1,300 @@
+// edit  method 
+
+  public JsonResult UpdateDaTa (List<Act_CashBankVoucherDet> DetailsItems, Act_CashBankVoucherMas vaucherMas, int[] DeleteItemS)
+        {
+            int comp_cd = Convert.ToInt32(Session["companyid"]);
+
+            var result = new
+            {
+                flag = false,
+                message = "Error occured. !"
+            };
+
+            // transaction Star ........
+
+           
+                try
+                {
+
+                string cnnString = db.Database.Connection.ConnectionString;
+
+                using (SqlConnection conn = new SqlConnection(cnnString))
+                {
+
+                    conn.Open();
+
+                    db = new SCMSContext(conn, false);
+
+                    using (var sqlTxn = conn.BeginTransaction())
+                    {
+
+                        db.Database.UseTransaction(sqlTxn);
+
+
+                        Hashtable ht = new Hashtable();
+
+                    if (DeleteItemS != null)
+                    {
+                        foreach (var item in DeleteItemS)
+                        {
+
+                            var delDetail = db.Act_CashBankVoucherDet.Find(item);
+                            db.Act_CashBankVoucherDet.Remove(delDetail);
+                            db.SaveChanges();
+
+
+                            // Delete From  Transaction ..........................
+
+                            var transactiondet = db.AccountLedger
+                           .Where(x => x.SourceRef == vaucherMas.Id && x.SourceName == "CashBankVoucher" && x.SourceRefDet==item)
+                           .ToList();
+                            foreach (var accountLedger in transactiondet)
+                            {
+
+                                db.AccountLedger.Remove(accountLedger);
+                                db.SaveChanges();
+                            }
+                            //-----------------acount ledger transaction end------------//
+                            //-------------------AccountGl Master---------------------//
+
+                          //SA  TransactionsHelpers htHelpers = new TransactionsHelpers();
+                          //SA  htHelpers.DeleteGlDetailsSohag(vaucherMas.Id,item, "CashBankVoucher");
+
+
+
+                        }
+                    }
+
+
+                    Act_CashBankVoucherMas voucher = db.Act_CashBankVoucherMas.Find(vaucherMas.Id);
+
+                    if (voucher == null)
+                    {
+                        result = new
+                        {
+                            flag = false,
+                            message = " Saving failed !"
+                        };
+
+                        return Json(result, JsonRequestBehavior.AllowGet);
+                    }
+
+                    voucher.Amount = vaucherMas.Amount;
+                    voucher.AmountBDT = vaucherMas.AmountBDT;
+                    voucher.PaymentType = vaucherMas.PaymentType;
+                    voucher.PayTo = vaucherMas.PayTo;
+                    voucher.PaymentMode = vaucherMas.PaymentMode;
+                    voucher.Cash_Bank_AccountId = vaucherMas.Cash_Bank_AccountId;
+                    voucher.VoucherNo = vaucherMas.VoucherNo;
+                    voucher.VoucherDate = vaucherMas.VoucherDate;
+                    voucher.DueDate = vaucherMas.DueDate;
+                    voucher.CurrencyId = vaucherMas.CurrencyId;
+                    voucher.Coversion_Rate = vaucherMas.Coversion_Rate;
+                    voucher.CheckNo = vaucherMas.CheckNo;
+                    voucher.CheckDate = vaucherMas.CheckDate;
+                    voucher.Narration = vaucherMas.Narration;
+                    voucher.CompanyUnitId = comp_cd;
+
+                    db.Entry(voucher).State = EntityState.Modified;
+                    db.SaveChanges();
+                    // deleteb Items-----------
+
+
+
+                    // save details data//
+                    if (DetailsItems != null)
+                    {
+                        foreach (var item in DetailsItems)
+                        {
+
+
+                            Act_CashBankVoucherDet voucherDet = new Act_CashBankVoucherDet();
+                            voucherDet.Id = item.Id;
+                            voucherDet.CashBankVoucherMasId = item.CashBankVoucherMasId;
+                            voucherDet.accno = item.accno;
+                            voucherDet.Amount = item.Amount;
+                            voucherDet.AmountBDT = item.AmountBDT;
+
+                            db.Entry(voucherDet).State = item.Id == 0 ? EntityState.Added : EntityState.Modified;
+                            db.SaveChanges();
+                            // Talukder-----------------------
+
+
+                            ht.Add(voucherDet.accno, voucherDet.Id);
+
+                        }
+                    }
+
+                    //----------------------------------- master table details table edit end------------------------//
+                    //----------------------- Ledger Transaction--------------------//
+
+                    var ledgermas = db.AccountLedger.Where(x => x.SourceRef == vaucherMas.Id && x.SourceName == "CashBankVoucher" && x.SourceRefDet == 0).SingleOrDefault();
+
+                    ledgermas.DrAmnt = 0;
+                    ledgermas.CrAmnt = vaucherMas.Amount;
+                    ledgermas.accno = vaucherMas.Cash_Bank_AccountId;
+
+
+                    db.Entry(ledgermas).State = EntityState.Modified;
+                    db.SaveChanges();
+
+                    //----------- Credit end-------------//
+
+                    var sl = 1;
+                    foreach (var item in DetailsItems)
+                    {
+                        if (item.Id > 0)
+                        {
+                            //  sl++;
+                            AccountLedger ledger = db.AccountLedger.Where(x => x.SourceRef == vaucherMas.Id && x.SourceName == "CashBankVoucher" && x.SourceRefDet == item.Id).SingleOrDefault();
+
+                            ledger.DrAmnt = item.Amount;
+
+                            ledger.accno = item.accno;
+
+
+                            db.Entry(ledgermas).State = EntityState.Modified;
+                            db.SaveChanges();
+
+
+                        }  // if end
+                        else
+                        {
+                            sl++;
+
+                            AccountLedger ledger = new AccountLedger();
+                            ledger.ClintId = 0;
+                            ledger.DrAmnt = item.Amount;
+                            ledger.CrAmnt = 0;
+                            ledger.SourceName = "CashBankVoucher";
+                            ledger.SourceRef = vaucherMas.Id;
+                            ledger.GL_Transaction_Flag = 1;
+                            ledger.accno = item.accno;
+                            ledger.Transaction_No = sl;
+                            ledger.preby = Convert.ToInt32(Session["uid"]);
+                            ledger.predt = DateTime.Now;
+                            ledger.CompanyUnitId = comp_cd;
+                            ledger.TransactionType = "D";
+                            db.AccountLedger.Add(ledger);
+                            db.SaveChanges();
+
+                        }
+
+                    }// foreach end
+
+                        //------------------------------Accounttransaction Sl Master---------------------------//
+                        // UpdateGl Transaction  master-------------------///
+                         TransactionsHelpers tr = new TransactionsHelpers();
+                        //SA tr.Updateglmaster(vaucherMas.Amount, "CV", vaucherMas.Id);
+
+                        var transMaster = new VMOtherAccTransMas()
+                        {
+                            data_source = "CV",
+                            SourceId = vaucherMas.Id,
+                            vouchdt = vaucherMas.VoucherDate,
+                            totcredit = vaucherMas.Amount,
+                            totdebit = vaucherMas.Amount
+                        };
+
+                        //------------------------------- Gl Transaction Details Update----------------
+
+                        List<VMOtherAccTransDets> transDetails = new List<VMOtherAccTransDets>();
+
+                        //SA tr.UpdategldetailsForCredit(vaucherMas.Amount, vaucherMas.Id, "CashBankVoucher");
+
+                        var transDetail = new VMOtherAccTransDets()
+                        {
+                            Id = 0,                         
+                            accno = voucher.Cash_Bank_AccountId??0,
+                            dramnt = 0,
+                            cramnt = vaucherMas.Amount,                         
+                            SourceRef = vaucherMas.Id, //
+                            TransactionType = "C", //
+                            SourceRefDet = 0, //
+                            SourceName = "CashBankVoucher" //
+                        };
+
+                        transDetails.Add(transDetail);
+
+                    var index = 0;
+                    foreach (var item in DetailsItems)
+                    {
+
+                        if (item.Id != 0) // modify ........
+                        {
+                                // tr.Updategldetails(item.Amount, "CashBankVoucher", item.Id, item.CashBankVoucherMasId);
+
+                                var transDetail1 = new VMOtherAccTransDets()
+                                {
+                                    Id = 0,
+                                    accno = item.accno,
+                                    dramnt = item.Amount,
+                                    cramnt = 0,
+                                    SourceRef = vaucherMas.Id, //
+                                    TransactionType = "D", //
+                                    SourceRefDet = item.Id, //
+                                    SourceName = "CashBankVoucher" //
+                                };
+
+                                transDetails.Add(transDetail1);
+                            }
+                        else
+                        {
+
+                            var GltransMasId = db.AccountTransactionMaster.Where(x => x.SourceId == vaucherMas.Id && x.data_source == "CV").Select(x => x.Id).SingleOrDefault();
+
+                            var slerialNo = db.AccountTransactionDetail
+                                                .Where(x => x.AccountTransactionMasterId == GltransMasId).Select(x => x.slNo).Max() + 1;
+
+                              // tr.glDetailsAdd(item.accno, item.Amount, GltransMasId, slerialNo, comp_cd, "CashBankVoucher", vaucherMas.Id, Convert.ToInt32(ht[item.accno]), "D");
+
+                                var transDetail1 = new VMOtherAccTransDets()
+                                {
+                                    Id = 0,
+                                    accno = item.accno,
+                                    dramnt = item.Amount,
+                                    cramnt = 0,
+                                    SourceRef = vaucherMas.Id, //
+                                    TransactionType = "D", //
+                                    SourceRefDet = item.Id, //
+                                    SourceName = "CashBankVoucher" //
+                                };
+
+                                transDetails.Add(transDetail1);
+
+                                index++;
+                                slerialNo++;
+                        }
+                    }// end for Each Loop
+
+                        GLTransactionHelpers glTxHelper = new GLTransactionHelpers(db);
+                        glTxHelper.UpdateGLTransactionFromOtherSource(conn, sqlTxn, comp_cd, transMaster, transDetails, DeleteItemS, "CashBankVoucher");
+
+
+                        sqlTxn.Commit();
+
+                        result = new
+                        {
+                            flag = true,
+                            message = "Saving successful !!",                         
+                        };
+
+                    }
+
+                }
+
+
+             }   // try  end
+             catch (Exception e)
+             {
+                // tran.Rollback();
+                result = new
+                {
+                    flag = false,
+                    message = e.Message,
+                };
+            }
+
+        
+            return Json(result, JsonRequestBehavior.AllowGet);
+        }

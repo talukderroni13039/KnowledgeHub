@@ -1,0 +1,97 @@
+public ActionResult RDLSalesQuantityandRevenueBasedonFabricSupplier(int reportType, int Year, int? SupplierId)
+        {
+
+
+            // Get Data .............................
+
+            RDLSalesQuantityandRevenueBasedonFabricSupplierDS ds = new RDLSalesQuantityandRevenueBasedonFabricSupplierDS();
+
+            if (reportType == 0)
+            {
+                var data = (from buyerMas in db.BuyerOrderMas
+                            join buyerDet in db.BuyerOrderDet on buyerMas.Id equals buyerDet.BuyerOrderMasId
+                            join buyerDetDet in db.ShipmentSummDet on buyerDet.Id equals buyerDetDet.BuyerOrderDetId
+                            join factoryDetDet in db.FactoryOrderDelivDet on buyerDetDet.Id equals factoryDetDet.ShipmentSummDetId
+                            where (SupplierId == null || buyerDet.FabricSupplierId == SupplierId)
+                            && factoryDetDet.ExFactoryDate.Value.Year == Year                            
+                            select new
+                            {
+                                SupplierId = buyerDet.FabricSupplierId,
+                                SupplierName = buyerDet.FabricSupplier.Name
+
+                            }).Distinct().ToList();
+
+                foreach (var item in data)
+                {
+                    var SupplierQty = db.BuyerOrderDet.Where(x => x.FabricSupplierId == item.SupplierId).Select(y => y.Quantity).Sum();
+                    var TotalQty = db.BuyerOrderDet.Select(y => y.Quantity).Sum();
+
+                    var Percentage = (Convert.ToDecimal(SupplierQty) * 100 / TotalQty);
+
+                    ds.data.AdddataRow(
+                        item.SupplierName,
+                        SupplierQty ?? 0,
+                        Percentage ?? 0,
+                        Year
+                        );
+                }
+
+            }
+            else
+            {
+                var data = (from buyerMas in db.BuyerOrderMas
+                            join buyerDet in db.BuyerOrderDet on buyerMas.Id equals buyerDet.BuyerOrderMasId
+                            join buyerDetDet in db.ShipmentSummDet on buyerDet.Id equals buyerDetDet.BuyerOrderDetId                           
+                            where (SupplierId == null || buyerDet.FabricSupplierId == SupplierId)
+                            && buyerDetDet.HandoverDate.Value.Year == Year
+                            select new
+                            {
+                                SupplierId = buyerDet.FabricSupplierId,
+                                SupplierName = buyerDet.FabricSupplier.Name
+
+                            }).Distinct().ToList();
+
+                foreach (var item in data)
+                {
+                    var SupplierQty = db.BuyerOrderDet.Where(x => x.FabricSupplierId == item.SupplierId).Select(y => y.Quantity).Sum();
+                    var TotalQty = db.BuyerOrderDet.Select(y => y.Quantity).Sum();
+
+                    var Percentage = (Convert.ToDecimal(SupplierQty) * 100 / TotalQty);
+
+                    ds.data.AdddataRow(
+                        item.SupplierName,
+                        SupplierQty??0,
+                        Percentage??0,
+                        Year
+                        );
+                }
+
+            }
+
+            
+
+                // End ...................................
+
+
+
+            ReportDocument rd = new ReportDocument();
+
+            rd.Load(Path.Combine(Server.MapPath("~/Reports"), "RDLSalesQuantityandRevenueBasedonFabricSupplier.rpt"));
+
+            rd.SetDataSource(ds);
+
+            Stream stream = rd.ExportToStream(ExportFormatType.PortableDocFormat);
+            MemoryStream ms = new MemoryStream();
+            stream.CopyTo(ms);
+            Byte[] fileBuffer = ms.ToArray();
+
+            Response.Buffer = false;
+            Response.ClearContent();
+            Response.ClearHeaders();
+            Response.ContentType = "application/pdf";
+            Response.AddHeader("content-length", fileBuffer.Length.ToString());
+            Response.BinaryWrite(fileBuffer);
+            rd.Close();
+            rd.Dispose();
+            return null;
+        }

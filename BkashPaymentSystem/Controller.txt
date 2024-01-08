@@ -1,0 +1,315 @@
+using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Text;
+using System.Threading.Tasks;
+using System.Web;
+using System.Web.Mvc;
+using Wardroom_Mess_Management.Models;
+using Wardroom_Mess_Management_System.Models;
+
+namespace Wardroom_Mess_Management.Controllers
+{
+    public class SendBillController : Controller
+    {
+        private SCMSContext db = new SCMSContext();
+        public ActionResult Index()
+        {
+            return View();
+        }
+
+        // GET: SendBill/Details/5
+        public ActionResult Details(int id)
+        {
+            return View();
+        }
+
+        public ActionResult ListOfPayment()
+        {
+
+            var data = db.PaymentInfoes.Where(x=>x.Status==true && x.PaymentDate!=null).Distinct().OrderByDescending(x => x.PaymentDate).ToList();
+            var s=0;
+            return View(data);
+        }
+        public ActionResult Create()
+        {
+
+            ViewBag.OfficerPONumberInformationId = new SelectList(db.OfficerPONumberInformations, "Id", "PONumber");
+
+            return View();
+        }
+
+
+        
+        public async Task<ActionResult>  GrantToken()
+        {
+            try
+            {
+             
+                var result = new
+                {
+
+                    authToken = "",
+                    appKey = "",
+                    currency = "",
+                    merchantInvoiceNumber = 0,
+                    intent = ""
+
+
+                };
+                Random rnd = new Random();
+                int myRandomNo = rnd.Next(10000000, 99999999);
+
+
+                 //   var apiData = db.WebApiInfoes.FirstOrDefault();*/ //  previous get data from database
+
+                // get data from web confiq value 
+
+
+                var Username= ConfigurationManager.AppSettings["Username"].ToString();
+
+                var SharedPassword = ConfigurationManager.AppSettings["SharedPassword"].ToString();
+                var app_key = ConfigurationManager.AppSettings["app_key"].ToString();
+                
+                var app_secret = ConfigurationManager.AppSettings["app_secret"].ToString();
+
+                var grantTokenUrl = ConfigurationManager.AppSettings["grantTokenUrl"].ToString();
+
+
+
+                //talukder added 13/12
+
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
+
+
+
+                using (var objClient = new HttpClient())
+                {
+                    objClient.DefaultRequestHeaders.TryAddWithoutValidation("username", Username);//previos  apiData.Username
+                    objClient.DefaultRequestHeaders.TryAddWithoutValidation("password", SharedPassword);//previos      objClient.DefaultRequestHeaders.TryAddWithoutValidation("password", apiData.SharedPassword);
+
+                    string data = "{ " + '"' + "app_key" + '"' + ": " + '"' + app_key + '"' + ", " + '"' + "app_secret" + '"' + ": " + '"' + app_secret + '"' + " }";   //previos      string data = "{ " + '"' + "app_key" + '"' + ": " + '"' + apiData.app_key + '"' + ", " + '"' + "app_secret" + '"' + ": " + '"' + apiData.app_secret + '"' + " }"; 
+                    var content = new StringContent(data, Encoding.UTF8, "application/json");
+
+                  
+                    using (HttpResponseMessage res = await objClient.PostAsync(grantTokenUrl, content)) //previos       using (HttpResponseMessage res = await objClient.PostAsync(apiData.grantTokenUrl, content))
+                    {
+                        if (res.IsSuccessStatusCode)
+                        {
+                            var bkresult = res.Content.ReadAsStringAsync().Result;
+                            result  = new 
+                            {
+                                authToken = bkresult,
+                                appKey = app_key,
+                                currency = "BDT",
+                                merchantInvoiceNumber = myRandomNo,
+                                intent = "sale"
+                            };
+                            TempData["Result"] = result;
+
+                        }
+                    }
+                }
+
+                return Json(result, JsonRequestBehavior.AllowGet);
+            }
+            catch(Exception e)
+            {
+                var message = e.Message;
+                return View();
+            }
+        }
+
+
+        [HttpPost]
+        public async Task<ActionResult> executeCheckout(string PayID)
+        {
+            try
+            {
+             
+                var Token = TempData["Tokenapi"].ToString();
+
+                dynamic result = null;
+
+
+                //  var apiData = db.WebApiInfoes.FirstOrDefault();*/// previos getdata from database
+
+
+                var app_key = ConfigurationManager.AppSettings["app_key"].ToString();
+
+                var executeCheckoutUrl = ConfigurationManager.AppSettings["executeCheckoutUrl"].ToString();
+
+
+
+
+                using (var objClient = new HttpClient())
+                {
+                    objClient.DefaultRequestHeaders.TryAddWithoutValidation("authorization", Token);
+                    objClient.DefaultRequestHeaders.TryAddWithoutValidation("x-app-key",app_key);
+
+
+                    string _exucuteUrl = executeCheckoutUrl + "/" + PayID;
+                    using (HttpResponseMessage res = await objClient.PostAsync(_exucuteUrl, null))
+                    {
+                       
+                       
+                        {
+                            if (res.IsSuccessStatusCode)
+                            {
+                                result = res.Content.ReadAsStringAsync().Result;
+                            }
+                        }
+                    }
+                }
+                var Result = new
+                {
+                    Data = result
+
+                };
+                return Json(Result, JsonRequestBehavior.AllowGet);
+            }
+            catch
+            {
+                return View();
+            }
+        }
+
+
+        [HttpPost]
+        public async Task<ActionResult> createCheckout(string Token, decimal amount,string intent,string currency,string merchantInvoiceNumber)
+        {
+            try
+            {
+
+                TempData["Tokenapi"] = Token.ToString();
+
+            
+                
+                dynamic BkashResult = TempData["Result"];
+
+                //   var apiData = db.WebApiInfoes.FirstOrDefault();*///previos  get data from Database
+
+                dynamic finalData=null;
+                // get data from web confiq
+
+
+                var app_key = ConfigurationManager.AppSettings["app_key"].ToString();
+
+                var createCheckoutUrl = ConfigurationManager.AppSettings["createCheckoutUrl"].ToString();
+
+
+
+                using (var objClient = new HttpClient())
+                {
+                    objClient.DefaultRequestHeaders.TryAddWithoutValidation("authorization", Token);
+                    objClient.DefaultRequestHeaders.TryAddWithoutValidation("x-app-key", app_key);
+
+                    string data = "{ " + '"' + "amount" + '"' + ": " + '"' + amount + '"' + ", " + '"' + "intent" + '"' + ": " + '"' + intent + '"' + ", " + '"' + "currency" + '"' + ": " + '"' + currency + '"' + ", " + '"' + "merchantInvoiceNumber" + '"' + ": " + '"' + merchantInvoiceNumber + '"' + " }";
+                    var content = new StringContent(data, Encoding.UTF8, "application/json");
+                    using (HttpResponseMessage res = await objClient.PostAsync(createCheckoutUrl, content))
+                    {
+                        if (res.IsSuccessStatusCode)
+                        {
+                          finalData = res.Content.ReadAsStringAsync().Result;
+                        }
+                    }
+                   
+                }
+                var result = new
+                {
+                    finalData
+
+                };
+                return Json(result, JsonRequestBehavior.AllowGet);
+            }
+            catch
+            {
+                return View();
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+
+        // POST: SendBill/Create
+        [HttpPost]
+        public ActionResult SaveData(Decimal Amount,int? OfficerPONumberInformationId,string merchantInvoiceNumber,bool flag)
+        {
+            try
+            {
+                PaymentInfo paymentinfo = new PaymentInfo();
+
+                paymentinfo.Amount = Amount;
+                paymentinfo.Status = flag;
+                paymentinfo.MerchantInvoiceNumber = merchantInvoiceNumber;
+                paymentinfo.OfficerPONumberInformationId = OfficerPONumberInformationId;
+                paymentinfo.PaymentDate = DateTime.Now;
+
+                db.PaymentInfoes.Add(paymentinfo);
+
+                db.SaveChanges();
+
+                return Json(true,JsonRequestBehavior.AllowGet);
+            }
+            catch
+            {
+                return View();
+            }
+        }
+
+        // GET: SendBill/Edit/5
+        public ActionResult Edit(int id)
+        {
+            return View();
+        }
+
+        // POST: SendBill/Edit/5
+        [HttpPost]
+        public ActionResult Edit(int id, FormCollection collection)
+        {
+            try
+            {
+                // TODO: Add update logic here
+
+                return RedirectToAction("Index");
+            }
+            catch
+            {
+                return View();
+            }
+        }
+
+        // GET: SendBill/Delete/5
+        public ActionResult Delete(int id)
+        {
+            return View();
+        }
+
+        // POST: SendBill/Delete/5
+        [HttpPost]
+        public ActionResult Delete(int id, FormCollection collection)
+        {
+            try
+            {
+                // TODO: Add delete logic here
+
+                return RedirectToAction("Index");
+            }
+            catch
+            {
+                return View();
+            }
+        }
+    }
+}

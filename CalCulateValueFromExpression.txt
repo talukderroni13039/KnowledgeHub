@@ -1,0 +1,61 @@
+
+                var expressionWithValues= MultipleReplace(item.Expression, NameValueAnalog);
+
+                if (string.IsNullOrEmpty(expressionWithValues) )
+                {
+                    return this;
+                }
+
+               var totalValue=MathFormulaComputeToVaue(expressionWithValues);
+
+public static string MultipleReplace(string text, Dictionary<string, int> replacements)
+{
+
+    HashSet<string> variablesInExpression = new HashSet<string>(
+     Regex.Matches(text, @"\b[A-Za-z_]\w*\b")
+          .Cast<Match>()
+          .Select(match => match.Value)
+            );
+
+    bool allVariablesPresent = variablesInExpression.All(variable => replacements.ContainsKey(variable));
+
+    if (!allVariablesPresent)
+    {
+        return null;
+    }
+
+    return Regex.Replace(text,
+        "(" + String.Join("|", replacements.Keys.Select(k => Regex.Escape(k))) + ")",
+        m => replacements[m.Value].ToString());
+}
+
+public  double MathFormulaComputeToVaue(string filledMathFormula)
+{
+    double value = 0;
+    try
+    {
+        value = Convert.ToDouble(new DataTable().Compute(filledMathFormula, ""));
+        value = Math.Abs(value);
+
+        if (double.IsNaN(value))
+        {
+            value = 0;
+        }
+    }
+    catch (Exception ex)
+    {
+        if (ex.Message == "Divide by zero error encountered.")
+        {
+            value = 0;
+        }
+        else if (ex.Message == "Attempted to divide by zero.")
+        {
+            value = 0;
+        }
+        else
+        {
+            value = 0;
+        }
+    }
+    return value;
+}

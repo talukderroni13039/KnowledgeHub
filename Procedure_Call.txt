@@ -1,0 +1,17 @@
+ 
+string cnnString = System.Configuration.ConfigurationManager.ConnectionStrings["SCMS"].ConnectionString;
+
+ SqlConnection cnn = new SqlConnection(cnnString);
+            SqlCommand cmd = new SqlCommand();
+            cmd.Connection = cnn;
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.CommandText = "glledgerDebitCredit";
+            //add any parameters the stored procedure might require
+            cmd.Parameters.AddWithValue("@CompCode", comp_cd);
+            cmd.Parameters.AddWithValue("@ACCNT_NO", tranaccno);
+            cmd.Parameters.AddWithValue("@DAMNT", trandr);
+            cmd.Parameters.AddWithValue("@CAMNT", trancr);
+            cnn.Open();
+            object o = cmd.ExecuteScalar();
+            
+            cnn.Close();

@@ -1,0 +1,31 @@
+
+response = clientHelper.GetAllData<TOVoucherPostStatus>(url).Result as List<TOVoucherPostStatus>;
+
+ public async Task<object> GetData<T>(string url) where T : class
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(baseUrl);
+
+                // Add an Accept header for JSON format.
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("key", "U2JpQXBpVG9EYXRhU29mdFBheXJvbGw=");
+                HttpResponseMessage response = client.GetAsync(url).Result;
+                if (response.IsSuccessStatusCode)
+                {
+                    try
+                    {
+                        var responsdata = response.Content.ReadAsAsync<T>().Result;
+                        client.Dispose();
+                        return responsdata;
+                    }
+                    catch (Exception ex)
+                    {
+                        client.Dispose();
+                        throw ex;
+                    }
+                }
+                return null;
+            }
+        }

@@ -1,0 +1,27 @@
+// generate Random number for SalesInvoiceNo----//
+            var samoleName = "BillNo-";
+
+            var date = DateTime.Now;
+
+            var month = date.Month;
+
+            var BillNo = samoleName + month + "-" + "001";
+
+
+            var existbillno = db.SalesInvoiceMas.OrderByDescending(x => x.InvoiceNo).Select(x => x.InvoiceNo).FirstOrDefault();
+            if (existbillno == null)
+            {
+                BillNo = BillNo;
+
+                ViewBag.BillNo = BillNo;
+            }
+            else
+            {
+                char last = existbillno[existbillno.Length - 1];
+                var lstone = Convert.ToInt32(last);
+                lstone = lstone + 1;
+
+                var replaced = existbillno.Substring(0, existbillno.Length - 1) + Convert.ToChar(lstone);
+
+                ViewBag.BillNo = replaced;
+            }

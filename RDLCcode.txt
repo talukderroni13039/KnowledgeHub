@@ -1,0 +1,28 @@
+            ReportViewer reportViewer = new ReportViewer();
+            reportViewer.ProcessingMode = ProcessingMode.Local;
+            reportViewer.SizeToReportContent = true;
+            reportViewer.Width = Unit.Percentage(100);
+            reportViewer.Height = Unit.Percentage(100);
+            reportViewer.PageCountMode = new PageCountMode();
+            reportViewer.LocalReport.ReportPath = Request.MapPath("~/Areas/PR/Reports/RDLC/TaxReliefInformation.rdlc");
+            reportViewer.LocalReport.SetParameters(GetReportParameter(commonParams, AllParameter));
+            ReportDataSource A = new ReportDataSource("DataSet1", FinalReliefList);
+            reportViewer.LocalReport.DataSources.Add(A);
+            reportViewer.ShowRefreshButton = false;
+
+          
+            ViewBag.ReportViewer = reportViewer;
+            return View("~/Areas/PR/Views/RPTTaxReliefInformation/TaxReliefInformation.cshtml");
+
+
+
+            @using ReportViewerForMvc;
+@{
+    ViewBag.Title = "Tax Relief Information Report";
+    Layout = "~/Views/Shared/_MasterReportLayout.cshtml";
+}
+
+
+<div align="center" style="min-height: 1000px; margin-top:2%; margin-left: auto; margin-right: auto;">
+    @Html.ReportViewer(ViewBag.ReportViewer as Microsoft.Reporting.WebForms.ReportViewer)
+</div>

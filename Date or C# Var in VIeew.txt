@@ -1,0 +1,5 @@
+ <input type="text"value="@date">
+
+or
+
+     @Html.TextBox("Date", "", new { @class = "form-control Datepicker", @Value =@DateTime.Now.ToShortDateString() })

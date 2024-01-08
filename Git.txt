@@ -1,0 +1,37 @@
+Git Commands  --
+
+using git bash
+
+git init
+
+git config --global user.name "Sohag" // skip --global if u want local 
+
+git config --global user.email "@gmail.com"
+
+git add .
+git add -all
+git add filenmae
+
+git status
+git log/ git log -oneline
+
+git commit -m "First Commit"
+
+git reset --hard commitcode
+git checkout commitcode
+
+git push url
+git clone url
+git fetch url
+git pull url
+
+git branch
+git checkout branchname
+git branch -b branchname
+git branch -d branchname
+
+git merge branchname
+
+git trash 
+git clean -f .. -n
+

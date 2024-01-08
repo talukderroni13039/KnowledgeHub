@@ -1,0 +1,9 @@
+  public  string GetTransformTemplate (string fileName)
+  {
+      var directoryPath = Path.Combine(AppContext.BaseDirectory + "\\Templates");
+      var fileDirectory = directoryPath + @"\" + fileName;
+      string jsonContent = File.ReadAllText(fileDirectory);
+      var  Content = jsonContent.Replace("\r", "").Replace("\n", "").Trim();
+
+      return Content;
+  }

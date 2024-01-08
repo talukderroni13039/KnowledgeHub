@@ -1,0 +1,1 @@
+                    var dramount = db.AccountTransactionDetail.Where(x => x.AccountTransactionMaster.vouchdt >= datefrom && x.AccountTransactionMaster.vouchdt <= dateto && x.accno == item.accno).Sum(t => (decimal?)t.dramnt) ?? 0m;

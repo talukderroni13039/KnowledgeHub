@@ -1,0 +1,149 @@
+  // Action Method
+ // Report Generate
+
+                    ReportDocument crystalReport = new ReportDocument();
+                    crystalReport.Load(Path.Combine(Server.MapPath("~/Reports"), "BillInformationReport.rpt"));
+                    //crystalReport.Load(Path.Combine(Server.MapPath("~/Reports"), "SampleReport.rpt"));
+
+                    crystalReport.SetDataSource(ds);
+              
+                    // To send Any File To Email Then First of all Save The File To Server.And Send The Upload path to the paramer and After Send File Delete the File Form Server
+                
+
+
+
+
+                    // Send Email
+
+
+                    string newLine = Environment.NewLine;
+
+                 
+               
+                    var Subject = "Bill Information of " + Item.PONumber;
+                    var Body = "Dear Sir/Madam," + newLine + newLine + "Please check the attachment for your mess bill for the month of"+BillDateFrom.Month +"/"+BillDateFrom.Year + newLine + newLine + "Best Regards  " + newLine + "BNS TITUMIR Wardroom Mess Secretary" + newLine + "Cell: 01769784013 " + newLine + "Email: tmrwardroom@gmail.com";
+
+
+
+                    var UserEmail = Item.Email;
+
+
+
+                    SendEmail email = new SendEmail();
+
+
+
+                    email.SendMail(Subject, Body, UserEmail, crystalReport,Item.PONumber);
+
+// Helper Class
+
+using System.Net.Mail;
+
+ public class SendEmail
+    {
+        private SCMSContext db = new SCMSContext();
+
+        private static SmtpClient _smtp = null;
+
+        public static string domain = "";
+        public static int port = 0;
+
+        public static SmtpClient Smtp
+        {
+            get
+            {
+                if (_smtp == null)
+                {
+                    //_smtp = new SmtpClient("192.168.2.2", 25); //smtp port and ip
+                    _smtp = new SmtpClient(domain, port); //smtp port and ip
+                    _smtp.UseDefaultCredentials = true;
+                    // _smtp.UseDefaultCredentials = false;
+                    //_smtp.Credentials = new System.Net.NetworkCredential("cclsoft@convincebd.com", "Soft329#");
+                    _smtp.EnableSsl = true;
+
+                    //ServicePointManager.ServerCertificateValidationCallback = delegate (object s, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors) { return true; };
+                }
+                return _smtp;
+            }
+        }
+
+        public void SendMail(string subject, string body, string UserEmail, dynamic crystalReport,string ponumber)
+        {
+            using (MailMessage ms = new MailMessage())
+            {
+                var settings = db.EmailSettings.FirstOrDefault();
+
+
+
+
+                SmtpClient smtpClient = new SmtpClient();/*(settings.ClientIP, settings.Port*/
+                smtpClient.UseDefaultCredentials = false;
+                smtpClient.Credentials = new System.Net.NetworkCredential(settings.UserName, settings.UserPassword);// Sender Email Address// And Password.
+
+                //smtpClient.Port = 25;
+                smtpClient.Host = "smtp.gmail.com";
+                smtpClient.Port = 587;
+
+                smtpClient.EnableSsl = true;
+                smtpClient.DeliveryMethod = SmtpDeliveryMethod.Network;  
+                 
+                   
+                MailMessage mailMessage = new MailMessage(settings.UserName, UserEmail);// Sender and Reciver Email
+
+               
+
+
+                mailMessage.Subject = subject;
+                mailMessage.Body = body;
+
+
+                mailMessage.Attachments.Add(new Attachment(crystalReport.ExportToStream(ExportFormatType.PortableDocFormat),""+ ponumber+" BillReport.pdf"));
+               
+                //To send File 
+                //mailMessage.Attachments.Add(new Attachment(fileName));
+
+
+              
+
+               
+                smtpClient.Send(mailMessage);
+
+                //  Dispose the resource or it causes problem to sending email after one
+
+                mailMessage.Dispose();
+                //smtpClient.Dispose();
+                ms.Dispose();
+                crystalReport.Close();
+                crystalReport.Dispose();
+
+                //Delte The File Afeer Send File.
+
+                //System.IO.File.Delete(fileName);
+
+
+
+
+
+
+
+
+
+
+            }
+
+
+
+        }
+
+       
+
+
+
+       
+
+
+
+
+    }
+
+

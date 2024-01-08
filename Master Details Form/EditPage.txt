@@ -1,0 +1,826 @@
+
+@model Supply_Chain_Management.Models.Act_CashBankVoucherMas
+
+@{
+    ViewBag.Title = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .tdpadding {
+        padding-left: 10px;
+        padding-top: 20px;
+    }
+</style>
+
+<div class="row">
+    <div class="col-md-12">
+        <!-- Basic layout-->
+        <div class="panel panel-flat">
+            <div class="panel-heading">
+                <h5 class="panel-title"><i class="icon-stack-plus position-left"></i>Cash / Bank Voucher</h5><hr />
+                <div class="heading-elements">
+                    <ul class="icons-list">
+                        <li><a data-action="collapse"></a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="panel-body">
+                @using (Html.BeginForm())
+                {
+                    @Html.AntiForgeryToken()
+
+                    <div class="form-horizontal">
+                        @*Form Start *@
+
+                        <input type="hidden" id="Id" value="@Model.Id" />
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                        <table style="width: 100%; " class="table-responsive scrolling  MasterTable">
+
+                            <tr>
+
+                                <td class="tdpadding">@Html.Label("Type", htmlAttributes: new { @class = "control-label" })</td>
+                                <td class="tdpadding">@Html.DropDownList("Type", null, new { @class = "form-control select2 PaymentType", @id = "PaymentType" })</td>
+
+                                <td class="tdpadding">@Html.Label("Voucher No", htmlAttributes: new { @class = "control-label VoucherNo" })</td>
+                                <td class="tdpadding">@Html.TextBoxFor(model => model.VoucherNo, new { @class = "form-control VoucherNo" })</td>
+
+                                <td class="tdpadding">@Html.Label("Voucher Date", htmlAttributes: new { @class = "control-label" })</td>
+                                <td class="tdpadding">@Html.TextBoxFor(model => model.VoucherDate, "{0:dd/MM/yyyy}", new { @class = "form-control datepicker VoucherDate" })</td>
+
+
+                            </tr>
+
+                            <tr>
+
+                                <td class="tdpadding">@Html.Label("Payment Mode", htmlAttributes: new { @class = "control-label" })</td>
+                                <td class="tdpadding">@Html.DropDownList("PaymentMode", null, "--Select--", htmlAttributes: new { @id = "PaymentMode", @class = "form-control select2 PaymentMode", @style = "!important" })</td>
+
+                                <td class="tdpadding">@Html.Label("Pay To", htmlAttributes: new { @class = "control-label" })</td>
+                                <td class="tdpadding">@Html.TextBoxFor(model => model.PayTo, new { @class = "form-control PayTo" })</td>
+
+                                <td class="tdpadding">@Html.Label("Cash/ Bank", htmlAttributes: new { @class = "control-label" })</td>
+                                <td class="tdpadding">@Html.DropDownList("Cash_Bank_AccountId", null,  htmlAttributes: new { @id = "Cash_Bank_AccountId", @class = "form-control select2 Cash_Bank_AccountId", @style = "!important", @disabled = "disabled" })</td>
+
+
+                            </tr>
+
+                            <tr>
+
+                                <td class="tdpadding">@Html.Label("Balance", new { @class = "control-label" })</td>
+                                <td class="tdpadding">  @Html.TextBox("Balance", "", new { @class = "form-control Balance", @Id = "Balance",@disabled="disabled" })</td>
+
+                                <td class="tdpadding">@Html.Label("Due Date", htmlAttributes: new { @class = "control-label" })</td>
+                                <td class="tdpadding">@Html.TextBoxFor(model => model.DueDate, "{0:dd/MM/yyyy}", new { @class = "form-control datepicker DueDate" })</td>
+
+                                <td class="tdpadding">@Html.Label("Currency", htmlAttributes: new { @class = "control-label" })</td>
+                                <td class="tdpadding">@Html.DropDownList("CurrencyId", null, "--Select--", htmlAttributes: new { @id = "CurrencyId", @class = "form-control select2 CurrencyId", @style = "!important" })</td>
+
+
+
+                            </tr>
+
+                            <tr>
+
+                                <td class="tdpadding">@Html.Label("Coversion Rate", htmlAttributes: new { @class = "control-label" })</td>
+                                <td class="tdpadding">@Html.TextBoxFor(model => model.Coversion_Rate, new { @class = "form-control Coversion_Rate", @id = "Coversion_Rate" })</td>
+
+                                <td class="tdpadding">@Html.Label("Check No", htmlAttributes: new { @class = "control-label" })</td>
+                                <td class="tdpadding">@Html.TextBoxFor(model => model.CheckNo, new { @class = "form-control CheckNo" })</td>
+
+                                <td class="tdpadding">@Html.Label("Check Date", htmlAttributes: new { @class = "control-label" })</td>
+                                <td class="tdpadding">@Html.TextBoxFor(model => model.CheckDate, "{0:dd/MM/yyyy}", new { @class = "form-control datepicker CheckDate" })</td>
+
+
+
+                            </tr>
+
+                            <tr>
+
+                                <td class="tdpadding">@Html.LabelFor(model => model.Amount, htmlAttributes: new { @class = "control-label" })</td>
+                                <td class="tdpadding">@Html.TextBoxFor(model => model.Amount, new { @class = "form-control Amount" })</td>
+
+                                <td class="tdpadding">@Html.Label("Amount BDT", htmlAttributes: new { @class = "control-label" })</td>
+                                <td class="tdpadding">@Html.TextBoxFor(model => model.AmountBDT, new { @class = "form-control AmountBDT" })</td>
+
+                                <td class="tdpadding">@Html.LabelFor(model => model.Narration, htmlAttributes: new { @class = "control-label" })</td>
+                                <td class="tdpadding">@Html.TextBoxFor(model => model.Narration, new { @class = "form-control Narration" })</td>
+
+
+
+
+                            </tr>
+                            @*<tr>
+
+                                    <td class="tdpadding">Amount In Words (BDT)</td>
+                                    <td class="tdpadding"></td>
+
+                                </tr>*@
+
+
+
+
+                        </table>
+
+                    </div> @*Form End  *@
+                }
+
+                @*----------------- detailts table------------------*@
+
+
+                <div class="details well" style="border: 1px solid white;">
+                    <div class="jumbotron" style="padding:10px;">
+
+                        <br />
+                        <div class="table-responsive scrolling">
+                            <table class="Resource-list table table-bordered TableItemDetails" id="TableItemDetails">
+                                <thead>
+                                    <tr class="bg-blue-700">
+                                        <th class="col-lg-1">SL No</th>
+                                        <th class="col-lg-3">Account Name</th>
+                                        <th class="col-lg-2">Amount</th>
+                                        <th class="col-lg-2">Converted Amount</th>
+
+
+                                        <th class="col-lg-1">&nbsp;</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><button type="button" class="btn btn-default btn-rounded btn-xs" id="btnAddRow"><i class="icon-add position-left"></i> Add Row</button> </td>
+                                        <td></td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+
+                                    <tr>
+
+                                        <td style="text-align: left; padding-right: 20px;" height="30px;">&nbsp;<b> Total</b></td>
+                                        <td></td>
+                                        <td class="bg-blue-700">
+                                            <label class="text-bold total_Amount" id="total_Amount " style="padding-left: 10px;"></label>
+                                            <input type="hidden" id="total_debit" />
+                                        </td>
+                                        <td class="bg-blue-700">
+                                            <label class="text-bold total_ConvertedAmount " id="total_ConvertedAmount " style="padding-left: 10px;"></label>
+                                        </td>
+                                    </tr>
+
+
+
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-footer">
+                <div class="col-md-offset-5 col-md-10">
+                    <button type="button" id="SaveItem" class="btn btn-primary"><i class="icon-add position-left"></i>Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+
+    $(document).ready(function() {
+
+
+        $(".select2").select2();
+
+        $('.datepicker').datepicker({
+            format: 'dd/mm/yyyy',
+            todayHighlight: true,
+            todayBtn: true,
+            autoclose: true
+        });
+
+
+        //$("#SaveItem").attr("disabled", "disabled");
+        $("#AmountBDT").attr("disabled", "disabled");
+        $("#Amount").attr("disabled", "disabled");
+
+        //------------------- Load Saved Data For Details Table-------------------//
+        LoadSavedData();
+
+
+        CheckDuplicate();
+
+        GetBalance();
+
+
+    });
+    var slno = 0;
+    var cnOrderTempId = 0;
+
+    function LoadSavedData() {
+
+        var Id = $('#Id').val();
+
+
+     //    Detail ....................................................
+
+        $.ajax({
+            url: "/Voucher/GetSavedData",
+            type: "post",
+            data: {Id:Id},
+            dataType: "json",
+            success: function (data) {
+                for (var i = 0; i < data.length; i++) {
+                    slno++;
+                    cnOrderTempId++;
+
+
+                    var newRow = jQuery('<tr><td> ' +
+                        '<input type="hidden" name = "TempOrderId" value="' +
+                        cnOrderTempId +
+                        '" class="TempOrderId" /><input type="hidden" name = "DetailId" value="' + data[i].Id + '" class="DetailId" />' +
+                        slno +
+                        '</td>' +
+                        '<td><select name="TransactionAccountNo" class="TransactionAccountNo form-control select2 input-xs"><option value=""></option></select></td>' +
+                        '<td><input type="text" name="TransactionAmount" class="form-control input-xs TransactionAmount" value="'+ data[i].Amount+'" /></td>' +
+                        '<td><input type="text" name="ConvertedAmount" class="form-control input-xs ConvertedAmount"   value="' + data[i].AmountBDT + '" /></td>' +
+                        '<td><button onclick="RemoveRow(this)" type="button" class="btn  text-warning-600 btn-flat btn-icon btn-rounded"><i class="icon-cross"></i></button></td></tr>');
+                    jQuery('table.TableItemDetails tbody').find('tr:last').before(newRow);
+
+                    // Set Account  name-------------------//----------------
+
+
+                    jQuery('table.TableItemDetails tbody').find('tr:last').before(newRow);
+
+                    var currRow = $('table.TableItemDetails tbody').find('tr:last').index() - 1;
+
+                    //alert(currRow);
+
+                    SetChosenAccount(currRow, data[i].TransactionAccountNo);
+                    $(".select2").select2();
+
+                   // --------------------------//----------------
+                }
+                CalculateTotalTransactionAmount();
+                CalculateTotalConvertedAmount();
+            }
+
+        });
+
+
+}
+    //var slno = 0;
+    //var cnOrderTempId = 0;
+    $('#btnAddRow').click(function() {
+
+        AddNewRow();
+        $("#SaveItem").removeAttr("disabled");
+
+    });
+
+    function AddNewRow() {
+
+
+        slno++;
+        cnOrderTempId++;
+
+
+        var newRow = jQuery('<tr><td> ' +
+            '<input type="hidden" name = "TempOrderId" value="' +
+            cnOrderTempId +'" class="TempOrderId" /><input type="hidden" name = "DetailId" value="' + 0 + '" class="DetailId" />' +
+            slno +
+            '</td>' +
+            '<td><select name="TransactionAccountNo" class="TransactionAccountNo form-control select2 input-xs"><option value=""></option></select></td>' +
+            '<td><input type="text" name="TransactionAmount" class="form-control input-xs TransactionAmount" /></td>' +
+            '<td><input type="text" name="ConvertedAmount" class="form-control input-xs ConvertedAmount" /></td>' +
+            '<td><button onclick="RemoveRow(this)" type="button" class="btn  text-warning-600 btn-flat btn-icon btn-rounded"><i class="icon-cross"></i></button></td></tr>');
+        jQuery('table.TableItemDetails tbody').find('tr:last').before(newRow);
+
+
+
+        // ----------------Get Acount Name-----------------//
+        GetAccountNames();
+        $(".select2").select2();
+
+    }
+    //----------- GET Account Names For Add new Row--------------//
+    function GetAccountNames() {
+        $.ajax({
+            url: "/AccountTransaction/GetHeadNames",
+            type: "post",
+            data: {},
+            dataType: "json",
+            success: function (data) {
+
+                jQuery('table.TableItemDetails tbody').find('tr:last').prev().find("select.TransactionAccountNo")
+                    .empty();
+
+                //jQuery('table.TableItemDetails tbody').find('tr:last').prev().prev().find("select.TransactionAccountNo").empty();
+
+                var account = "<select id='account'><option value=''></option></select>";
+                var ListOfAccounts = data.ListOfAccounts.length;
+
+                var account = "<select id='account'>";
+                account = account + '<option value=""></option>';
+                for (var i = 0; i < ListOfAccounts; i++) {
+                    account = account +
+                        '<option value=' +
+                        data.ListOfAccounts[i].Value +
+                        '>' +
+                        data.ListOfAccounts[i].Text +
+                        '</option>';
+                }
+                account = account + '</select>';
+                jQuery('table.TableItemDetails tbody').find('tr:last').prev().find("select.TransactionAccountNo")
+                    .html(account).removeAttr("disabled");;
+
+            },
+
+        });
+    }
+    //--------------------------//--------------------
+
+    function SetChosenAccount(currRow,selAccountVal) {
+        $.ajax({
+            url: "/AccountTransaction/GetHeadNames",
+            type: "post",
+            data: {},
+            dataType: "json",
+            success: function(data) {
+
+                jQuery('table.TableItemDetails tbody').find('tr:last').prev().find("select.TransactionAccountNo")
+                    .empty();
+
+                //jQuery('table.TableItemDetails tbody').find('tr:last').prev().prev().find("select.TransactionAccountNo").empty();
+
+                var account = "<select id='account'><option value=''></option></select>";
+                var ListOfAccounts = data.ListOfAccounts.length;
+
+                var account = "<select id='account'>";
+                account = account + '<option value=""></option>';
+                for (var i = 0; i < ListOfAccounts; i++) {
+                    account = account +
+                        '<option value=' +
+                        data.ListOfAccounts[i].Value +
+                        '>' +
+                        data.ListOfAccounts[i].Text +
+                        '</option>';
+                }
+                account = account + '</select>';
+                jQuery('table.TableItemDetails tbody').find('tr:last').prev().find("select.TransactionAccountNo")
+                    .html(account).removeAttr("disabled");;
+
+
+
+                $('table.TableItemDetails tbody tr').eq(currRow).find("select.TransactionAccountNo").html(account);
+
+                $('table.TableItemDetails tbody tr').eq(currRow).find("select.TransactionAccountNo").val(selAccountVal).change();
+            }
+
+        });
+    }
+    //--------------  Check For Account Name--------------------//
+
+    function CheckDuplicate() {
+        $('#TableItemDetails').on('change',
+            '.TransactionAccountNo',
+            function() {
+
+                var selectedValue = $(this).val();
+                var row = $(this).closest('tr');
+
+                if (selectedValue == null || selectedValue == '') {
+                    return;
+                }
+
+                //check duplicate
+                var TempOrderId = row.find('.TempOrderId').val();
+                var totrow = $("table.TableItemDetails tbody tr").length;
+                var duplicateflag = false;
+
+                for (var i = 0; i < totrow; i++) {
+                    var currRow = $('table.TableItemDetails tbody tr').eq(i).find(".TempOrderId").val();
+
+                    if (currRow == TempOrderId) {
+                        continue;
+                    } else {
+                        if ($('table.TableItemDetails tbody tr').eq(i).find(".TransactionAccountNo").val() ==
+                            selectedValue) {
+                            duplicateflag = true;
+
+                        }
+                    }
+                }
+
+                if (duplicateflag) {
+                    alert("Account No already exists!");
+
+                    $(this).val('');
+                    $(this).trigger('change');
+                    return;
+                }
+                else {
+
+                }
+
+            });
+    }
+
+    //--------------------- Delete Details table Row--------------------
+    var DeleteItemS = [];
+
+    function RemoveRow(e) {
+        if (confirm('Do you really want to delete?') == false) {
+            return;
+        }
+        var currRowIndex = $(e).closest('tr').index() + 1;
+        var id = $('#TableItemDetails tr').eq(currRowIndex).find("input.DetailId").val();
+
+        if (id > 0) {
+
+            DeleteItemS.push(id);
+
+
+            $(e).parent().parent().remove();
+
+            CalculateTotalTransactionAmount();
+            CalculateTotalConvertedAmount();
+
+        }
+
+        else {
+            $(e).parent().parent().remove();
+            CalculateTotalTransactionAmount();
+            CalculateTotalConvertedAmount();
+        }
+        console.log(DeleteItemS);
+    }
+
+    // ------------------------ Amount------------------
+
+    $('#TableItemDetails').on('change', '.TransactionAmount', function () {
+
+        var row = $(this).closest('tr');
+
+        var TransactionAmount = row.find('input.TransactionAmount').val();
+
+        var Rate = $('#Coversion_Rate').val();
+
+        var ConvertedAmount = TransactionAmount * Rate;
+
+        row.find('input.ConvertedAmount').val(ConvertedAmount);
+
+
+
+        CalculateTotalTransactionAmount();
+        CalculateTotalConvertedAmount();
+        //  CalculateGrandTotal();
+
+    });
+    //-------------------------- Converted Amount----------------
+    //$('#TableItemDetails').on('change', '.ConvertedAmount', function () {
+
+
+    //    CalculateTotalConvertedAmount();
+
+    //    //  CalculateGrandTotal();
+
+    //});
+
+    //---------------- Conversion Rate Change-------------------//
+    $('.MasterTable').on('change',
+        '.Coversion_Rate',
+        function() {
+            // var totRow = $('table.TableItemDetails tbody tr').length - 1;
+            //  var Coversion_Rate = $('#Coversion_Rate').val();
+
+            //    for (var i = 0; i < totRow; i++) {
+
+            //     var transactionValue = $('table.TableItemDetails tbody tr').eq(i).find(".TransactionAmount").val();
+            //        alert(transactionValue);
+            //    }
+            //// CalculateTotalTransactionAmount();
+            CalculateTotalConvertedAmount();
+        });
+
+
+    //------------------------Calculate Total Amount-------------
+
+
+    function CalculateTotalTransactionAmount() {
+
+
+        var TransactionAmount = 0.0;
+
+        var totRow = $('table.TableItemDetails tbody tr').length - 1;
+
+        for (var i = 0; i < totRow; i++) {
+            var transactionValue = $('table.TableItemDetails tbody tr').eq(i).find(".TransactionAmount").val();
+
+
+            if ($.isNumeric(transactionValue)) {
+
+                TransactionAmount = TransactionAmount + parseFloat(transactionValue);
+
+            }
+            else {
+
+            }
+        }
+
+        $('table.TableItemDetails tfoot tr').find("label.total_Amount").text(TransactionAmount);
+
+        $('#Amount').val(TransactionAmount);
+
+        //// -- master -------
+
+        //$('#Amount').val(grandDebit);
+
+        //var convertion_rate = $('#Coversion_Rate').val();
+        //var amountbdt = grandDebit * convertion_rate;
+
+        //$('#AmountBDT').val(amountbdt);
+    }
+
+    //-----------------------------------------=CONVERTED aMOUNT----------------
+
+
+
+    function CalculateTotalConvertedAmount() {
+
+
+        var ConvertedAmountSum = 0.0;
+
+        var totRow = $('table.TableItemDetails tbody tr').length - 1;
+
+        for (var i = 0; i < totRow; i++) {
+            //  var ConvertedValue = $('table.TableItemDetails tbody tr').eq(i).find(".ConvertedAmount").val();
+
+            // Sohag
+
+            var ConvertedValue = $('table.TableItemDetails tbody tr').eq(i).find(".TransactionAmount").val()*$("#Coversion_Rate").val();
+
+            $('table.TableItemDetails tbody tr').eq(i).find(".ConvertedAmount").val(ConvertedValue);
+
+            // End
+
+
+            if ($.isNumeric(ConvertedValue)) {
+
+                ConvertedAmountSum = ConvertedAmountSum + parseFloat(ConvertedValue);
+
+            }
+            else {
+
+            }
+        }
+
+        $('table.TableItemDetails tfoot tr').find("label.total_ConvertedAmount").text(ConvertedAmountSum);
+
+
+        $('#AmountBDT').val(ConvertedAmountSum);
+    }
+    //------------------\\...................
+
+
+    $('#SaveItem').click(function() {
+
+        //------------- Validation---------------------//
+
+        if ($('#PaymentType').val() == "") {
+            alert("Enter  Payment Type!");
+
+            $('#PaymentType').focus();
+        }
+
+        else if ($('#VoucherNo').val() == "") {
+            alert("Enter Voucher No!");
+
+            $('#VoucherNo').focus();
+        }
+        else if ($('#VoucherDate').val() == "") {
+            alert("Enter Voucher Date!");
+
+            $('#VoucherDate').focus();
+        }
+        else if ($('#PaymentMode').val() == "") {
+            alert("Enter Payment Mode  !");
+
+            $('#PaymentMode').focus();
+        }
+        //else if ($('#PayTo').val() == "") {
+        //    alert("Enter PayTo!");
+
+        //    $('#PayTo').focus();
+        //}
+        else if ($('#Cash_Bank_AccountId').val() == "") {
+            alert("Enter Cash/ Bank_Account !");
+
+            $('#Cash_Bank_AccountId').focus();
+        }
+        //else if ($('#DueDate').val() == "") {
+        //    alert("Enter Due Date!");
+
+        //    $('#DueDate').focus();
+        //}
+        else if ($('#CurrencyId').val() == "") {
+            alert("Enter Currency!");
+            isValidAll = false;
+            $('#CurrencyId').focus();
+        }
+        else if ($('#Coversion_Rate').val() == "") {
+            alert("Enter Coversion Rate!");
+
+            $('#Coversion_Rate').focus();
+        }
+        //else if ($('#CheckNo').val() == "") {
+        //    alert("Enter Check No !");
+
+        //    $('#CheckNo').focus();
+        //}
+        else if ($('#Amount').val() == "") {
+            alert("Enter Amount Rate!");
+
+            $('#Amount').focus();
+        }
+        else if ($('#AmountBDT').val() == "") {
+            alert("Enter Amount in BDT Rate!");
+
+            $('#AmountBDT').focus();
+        }
+
+        //else if ($('#CheckDate').val() == "") {
+        //    alert("Enter Check Date!");
+
+        //    $('#CheckDate').focus();
+        //}
+        else if ($('#AmountBDT').val() == "") {
+            alert("Enter Amount in BDT Rate!");
+
+            $('#AmountBDT').focus();
+        }
+        else if (CheckDetailData() == true)
+        {
+            SaveData();
+        }
+
+
+    });
+
+
+    function CheckDetailData() {
+        var totRow = $('table.TableItemDetails tbody tr').length - 1;
+
+        for (var i = 0; i < totRow; i++) {
+
+            if ($('Table.TableItemDetails tbody tr').eq(i).find("Select.TransactionAccountNo").val() == "") {
+                alert(' Transaction Account Name Required');
+                return false;
+            }
+            else if ($('Table.TableItemDetails tbody tr').eq(i).find("input.TransactionAmount").val() == "") {
+                alert('Amount required');
+                return false;
+            }
+            else if ($('Table.TableItemDetails tbody tr').eq(i).find("input.ConvertedAmount").val() == "") {
+                alert('Converted Amount required');
+                return false;
+            }
+
+        }
+        return true;
+    }
+
+
+    function SaveData() {
+
+        // ------------- Master Table Data---------------//
+        var MasterId = $("#Id").val();
+        var PaymentType = $.trim($('#PaymentType').val());
+
+        var VoucherNo = $('#VoucherNo ').val();
+        var VoucherDate = $.trim($('#VoucherDate ').val());
+
+
+        var PaymentMode = $.trim($('#PaymentMode  ').val());
+        var PayTo = $('#PayTo ').val();
+        var Cash_Bank_AccountId = $('#Cash_Bank_AccountId ').val();
+
+        var DueDate = $('#DueDate').val();
+        var CurrencyId = $.trim($('#CurrencyId  ').val());
+        var Coversion_Rate = $.trim($('#Coversion_Rate   ').val());
+        var CheckNo = $('#CheckNo').val();
+        var Amount = $('#Amount   ').val();
+
+
+        var AmountBDT = $('#AmountBDT').val();
+        var Narration = $('#Narration').val();
+        var CheckDate = $('#CheckDate').val();
+        //-----------Details Table Data----------------//
+
+        
+
+        var  TransactionAccountNo = document.getElementsByName("TransactionAccountNo");
+        var  TransactionAmount = document.getElementsByName("TransactionAmount");
+        var  ConvertedAmount = document.getElementsByName("ConvertedAmount");
+        var  Id = document.getElementsByName("DetailId");
+
+        var DetailsItems = [];
+
+        for (var i = 0; i < TransactionAccountNo.length; i++) {
+
+            DetailsItems.push({
+                CashBankVoucherMasId: MasterId,
+                Id:Id[i].value,
+                accno: TransactionAccountNo[i].value,
+                Amount: TransactionAmount[i].value,
+                AmountBDT: ConvertedAmount[i].value
+            });
+
+
+        }
+
+        console.log(DetailsItems);
+
+        // ----------------------//
+        UpdateDataDetails = JSON.stringify({
+            Id: MasterId,
+            DeleteItemS:DeleteItemS,
+            DetailsItems:DetailsItems,
+            PaymentType: PaymentType,
+            VoucherNo: VoucherNo,
+            VoucherDate: VoucherDate,
+            PaymentMode: PaymentMode,
+            PayTo: PayTo,
+            Cash_Bank_AccountId: Cash_Bank_AccountId,
+            DueDate: DueDate,
+            CurrencyId: CurrencyId,
+            Coversion_Rate: Coversion_Rate,
+            CheckNo: CheckNo,
+            Amount: Amount,
+            AmountBDT: AmountBDT,
+            Narration: Narration,
+            CheckDate: CheckDate
+        });
+
+        
+
+        $.ajax({
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            type: 'POST',
+            url: '/Voucher/UpdateData',
+            data: UpdateDataDetails,
+            success: function (result) {
+
+                console.log(result);
+
+                if (result.flag == true)
+                {
+                    alert("Record save successfully!");
+                    window.location = "/Voucher/Index";
+
+                }
+                else {
+
+                    alert(result.Message);
+                }
+
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                alert('Save Error: ' + textStatus + ' - ' + errorThrown);
+                $("#SaveItem").removeAttr("disabled");
+            }
+        });
+
+
+    };
+
+
+    function GetBalance() {
+
+        var CBI = $('#Cash_Bank_AccountId').val();
+
+        //alert(CBI);
+
+        data = JSON.stringify({ accno: CBI });
+
+        $.ajax({
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            type: 'POST',
+            url: '/AccountGlMasters/getcurbal',
+            data: data,
+            success: function (result) {
+                //console.log(result);
+
+                $('#Balance').val(result);
+
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                alert('Save Error: ' + textStatus + ' - ' + errorThrown);
+                //  $("#SaveItem").removeAttr("disabled");
+            }
+        });
+
+
+    }
+
+</script>

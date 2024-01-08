@@ -1,0 +1,9 @@
+    $('table.TableItemDetails tbody tr .SlNo').each(function (index) {
+
+                    alert(index);
+                  
+
+
+                });
+
+// No sapce after table tag but space after tbody and tr
